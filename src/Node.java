@@ -1,4 +1,6 @@
-public class Node {
+import java.util.Comparator;
+
+public class Node{
     private Node parent;
     private int[] stateArray;
     private int position;
@@ -8,6 +10,7 @@ public class Node {
     Node(int[] state){
         this.stateArray = state;
         arraySize = stateArray.length;
+        f = 0;
     }
 
     public int[] getStateArray() {
@@ -22,4 +25,11 @@ public class Node {
         return arraySize;
     }
 
+    public int getF(){
+        return f;
+    }
+
+    public void setF(int f) {
+        this.f = f;
+    }
 }

@@ -9,7 +9,15 @@ public class PuzzleDriver {
     private Node currentBoard;
     private Node initialBoard;
     private int[] goalBoard;
-    private PriorityQueue<Node> pQueue = new PriorityQueue<Node>();
+    Comparator<Node> comparator = new Comparator<>() {
+        @Override
+        public int compare(Node o1, Node o2) {
+            return o1.getF() - o2.getF();
+        }
+    };
+    private PriorityQueue<Node> openList = new PriorityQueue<Node>(200, comparator);
+
+
 
     PuzzleDriver(int[] initialBoard, int[] goalBoard){
         this.initialBoard = new Node(initialBoard);
@@ -119,32 +127,20 @@ public class PuzzleDriver {
     }
 
     public int locateTileIndex(int rPos, int cPos){
-//        System.out.println("Row: " + rPos + " Col: " + cPos);
         int[] currentArray = currentBoard.getStateArray();
         for(int i = 0; i < currentArray.length; i++){
             int boardCol = i % ((currentArray.length/2)-1);
             int boardRow = (i - boardCol) / ((currentArray.length/2)-1);
             if(boardRow == rPos && boardCol == cPos){
-//                System.out.println("index : " + i);
                 return i;
             }
         }
         return 0;
     }
 
-//    public void swap(){
-//        // middle
-//        int[] copyArray = Arrays.copyOf(currentBoard.getStateArray(), currentBoard.getArraySize());
-//        System.out.println(Arrays.toString(copyArray));
-//        int cache = copyArray[4];
-//        copyArray[4] = copyArray[1];
-//        copyArray[1] = cache;
-//        System.out.println(Arrays.toString(copyArray));
-//
-//    }
-
-    public void swap1(Stack<Action> x){
-        List<int[]> stateArrays = new ArrayList<>();
+    public List<Node> swap(Stack<Action> x){
+        //List<int[]> stateArrays = new ArrayList<>();
+        List<Node> successors = new ArrayList<>();
         int[] emptyPos = locateEmptyTile();
 
         for(Action a: x){
@@ -182,15 +178,19 @@ public class PuzzleDriver {
             int temp = copyArray[swapIndex];
             copyArray[swapIndex] = copyArray[emptyTileIndex];
             copyArray[emptyTileIndex] = temp;
-            System.out.println(Arrays.toString(copyArray));
-            System.out.println("******************************");
-            stateArrays.add(copyArray);
+//            System.out.println(Arrays.toString(copyArray));
+//            System.out.println("******************************");
+//            stateArrays.add(copyArray);
+            successors.add(new Node(copyArray));
         }
-
+        return successors;
     }
 
-    public void generateSuccessors(int rPos, int cPos){
+    public List<Node> generateSuccessors(){
         Stack<Action> actionStack = new Stack<Action>();
+        int[] emptyTile = locateEmptyTile();
+        int rPos = emptyTile[0];
+        int cPos = emptyTile[1];
         if(rPos == 0){
             // only down
             actionStack.push(Action.DOWN);
@@ -210,33 +210,20 @@ public class PuzzleDriver {
             // left
             actionStack.push(Action.LEFT);
         }else{
-            //left & right
+            // left & right
             actionStack.push(Action.LEFT);
             actionStack.push(Action.RIGHT);
         }
-        System.out.println();
-        System.out.println("actions taken: " + actionStack.toString());
+//        System.out.println();
+//        System.out.println("actions taken: " + actionStack.toString());
 
-        swap1(actionStack);
-
-
-
-
-//        int[] emptyTilePos = locateEmptyTile();
-//        int x = emptyTilePos[0];
-//        int y = emptyTilePos[1];
-//        if(x == 1 && y == 1){
-//            //middle position
-//            //do swap (left, right, up, down)
-//            swap();
-//            System.out.println("Empty is in the middle !");
-//        }
+        return swap(actionStack);
     }
 
     public void solvePuzzle(){
         // TESTING STUFF
         if(isSolvable(currentBoard.getStateArray())){ System.out.println("Puzzle is solvable !");
-        }else{ System.out.println("Not solvable !");}
+        }else{ System.out.println("Not solvable !"); return;}
         System.out.println();
         System.out.println("Misplaced Tiles: " + getMisplacedTiles());
         getManhattanDistance();
@@ -245,7 +232,23 @@ public class PuzzleDriver {
         System.out.println("Initial Puzzle " + Arrays.toString(currentBoard.getStateArray()));
 
         //A*
-        
+        // initialize open list
+        // initialize closed list
+
+        openList.add(this.initialBoard);
+
+        while(!openList.isEmpty()){
+            this.currentBoard = openList.poll();
+            //generate successors and set their parents to q
+            List<Node> successors = generateSuccessors();
+            for(Node x: successors){
+                System.out.println();
+                System.out.println("Successors:");
+                System.out.println("---> " + Arrays.toString(x.getStateArray()));
+            }
+
+        }
+
     }
 
 
