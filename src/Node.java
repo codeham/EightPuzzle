@@ -6,11 +6,13 @@ public class Node{
     private int position;
     private int f, g, h;
     private int arraySize;
+    private int currentDepth;
 
     Node(int[] state){
         this.stateArray = state;
         arraySize = stateArray.length;
         f = 0;
+        currentDepth = 0;
     }
 
     public int[] getStateArray() {
@@ -37,7 +39,35 @@ public class Node{
         this.f = f;
     }
 
+    public int getG(){
+        return g;
+    }
+
+    public void setG(int g) {
+        this.g = g;
+    }
+
+    public int getH() {
+        return h;
+    }
+
+    public void setH(int h) {
+        this.h = h;
+    }
+
     public void setParent(Node parent){
         this.parent = parent;
+    }
+
+    public int getCurrentDepth() {
+        return currentDepth;
+    }
+
+    public void setCurrentDepth(int currentDepth) {
+        this.currentDepth = currentDepth;
+    }
+
+    public void incrementDepth(){
+        this.currentDepth = currentDepth++;
     }
 }

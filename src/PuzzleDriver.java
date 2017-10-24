@@ -16,6 +16,7 @@ public class PuzzleDriver {
         }
     };
     private PriorityQueue<Node> openList = new PriorityQueue<Node>(200, comparator);
+    private HashSet<Node> closedList = new HashSet<>();
 
 
 
@@ -79,31 +80,37 @@ public class PuzzleDriver {
      * @return int that holds misplaced tile count
      * subtract 1 since blank space doesn't rep. a move
      */
-    public int getMisplacedTiles(){
+    public int getMisplacedTiles(Node successor){
         int misplacedCount = 0;
-        int[] board = currentBoard.getStateArray();
+        //int[] board = currentBoard.getStateArray();
+        int[] boardArray = successor.getStateArray();
         for(int i = 0; i < 9; i++){
-            if(board[i] != goalBoard[i]){
+            if(boardArray[i] != goalBoard[i]){
                 misplacedCount++;
             }
         }
-        if(misplacedCount == 0){ return misplacedCount; }
+        if(misplacedCount == 0){
+            return misplacedCount;
+        }
+        System.out.println();
+        System.out.println("Misplaced Count: " + (misplacedCount-1));
         return misplacedCount-1;
     }
 
-    public int getManhattanDistance(){
-        int[] boardArray = currentBoard.getStateArray();
+    public int getManhattanDistance(Node successor){
+        //int[] boardArray = currentBoard.getStateArray();
+        int[] boardArray = successor.getStateArray();
         int manhattanSum = 0;
         for(int i = 0; i < boardArray.length; i++){
             if(boardArray[i] == 0){ continue; }
             int boardCol = i % ((boardArray.length/2)-1);
             int boardRow = (i - boardCol) / ((boardArray.length/2)-1);
             int tileNumber = boardArray[i];
-            System.out.println("col: " + boardCol + " row: " + boardRow + "    -> " + tileNumber);
+//            System.out.println("col: " + boardCol + " row: " + boardRow + "    -> " + tileNumber);
             int[] goalPosition = getGoalPosition(tileNumber);
             manhattanSum += Math.abs(goalPosition[0] - boardRow) + Math.abs(goalPosition[1] - boardCol);
         }
-        System.out.println("Manhattan Sum is : " + manhattanSum);
+        //System.out.println("Manhattan Sum is : " + manhattanSum);
         return manhattanSum;
     }
 
@@ -163,22 +170,22 @@ public class PuzzleDriver {
                 case UP:
                     // decrement row
                     swapIndex = locateTileIndex(--rPos, cPos);
-                    System.out.println("index: " + swapIndex + " UP");
+                    //System.out.println("index: " + swapIndex + " UP");
                     break;
                 case DOWN:
                     // increment row
                     swapIndex = locateTileIndex(++rPos, cPos);
-                    System.out.println("index: " +swapIndex + " DOWN");
+                    //System.out.println("index: " +swapIndex + " DOWN");
                     break;
                 case LEFT:
                     // decrement col
                     swapIndex = locateTileIndex(rPos, --cPos);
-                    System.out.println("index: " +swapIndex + " LEFT");
+                    //System.out.println("index: " +swapIndex + " LEFT");
                     break;
                 case RIGHT:
                     // increment col
                     swapIndex = locateTileIndex(rPos, ++cPos);
-                    System.out.println("index: " +swapIndex + " RIGHT");
+                    //System.out.println("index: " +swapIndex + " RIGHT");
                     break;
             }
             // do the swap in the copy array
@@ -237,38 +244,63 @@ public class PuzzleDriver {
 
     public void solvePuzzle(){
         // TESTING STUFF
-        if(isSolvable(currentBoard.getStateArray())){ System.out.println("Puzzle is solvable !");
-        }else{ System.out.println("Not solvable !"); return;}
-        System.out.println();
-        System.out.println("Misplaced Tiles: " + getMisplacedTiles());
-        System.out.println();
-        getManhattanDistance();
-        System.out.println();
+        if(!isSolvable(currentBoard.getStateArray())){
+//            throw new IllegalArgumentException("Unsolvable Puzzle");
+            System.out.println("Puzzle Not Solvable !");
+            return;
+        }
 
-
+        System.out.println();
+        System.out.println("**Initial Board**");
         System.out.println("Initial Puzzle " + Arrays.toString(currentBoard.getStateArray()));
+        System.out.println("Misplaced Tiles: " + getMisplacedTiles(initialBoard));
+        getManhattanDistance(initialBoard);
+
+        System.out.println();
+
 
         //A*
         // initialize open list
         // initialize closed list
+//        int depth = 0;
 
         openList.add(this.initialBoard);
 
         while(!openList.isEmpty()){
             this.currentBoard = openList.poll();
+            System.out.println("Move --> " + Arrays.toString(this.currentBoard.getStateArray()));
+            System.out.println("Depth Count: " + currentBoard.getCurrentDepth());
+            System.out.println();
             //generate successors and set their parents to q
             List<Node> successors = setParents(generateSuccessors());
-            for(Node x: successors){
-                System.out.println("Successor ----> " + Arrays.toString(x.getStateArray()));
-                if(isGoal(x)){
+            for(Node successor: successors){
+                successor.setCurrentDepth(successor.getParent().getCurrentDepth() + 1);
+                if(isGoal(successor)){
+                    // if the successor is in fact the goal state we need, stop the loop and return
+                    System.out.println("Matched ---> " + Arrays.toString(successor.getStateArray()));
+                    System.out.println("Final Depth Count: " + successor.getCurrentDepth());
                     return;
                 }
+                successor.setG(successor.getCurrentDepth());
+                successor.setH(getManhattanDistance(successor));
+                successor.setF(successor.getG() + successor.getH());
+                
+                if(openList.contains(successor)){
+                    // skip the successor, it's already in the list
+                    continue;
+                }
+
+                if(closedList.contains(successor)){
+                    // skip the successor, already in closed list
+                    continue;
+                }else {
+                    // add node to open list
+                    openList.add(successor);
+                }
             }
-
+            closedList.add(currentBoard);
+            openList.remove(currentBoard);
         }
-
-        System.out.println(Arrays.toString(goalBoard));
-
     }
 
 
