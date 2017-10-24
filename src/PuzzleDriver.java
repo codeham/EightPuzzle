@@ -43,6 +43,14 @@ public class PuzzleDriver {
         return false;
     }
 
+    public boolean isGoal(Node successor){
+        if(Arrays.equals(successor.getStateArray(), goalBoard)){
+            System.out.println("Goal board match !");
+           return true;
+        }
+        return false;
+    }
+
     /**
      * helper method calculates amount of inversions in the puzzle.
      * @return int represents inversion qty.
@@ -220,13 +228,22 @@ public class PuzzleDriver {
         return swap(actionStack);
     }
 
+    public List<Node> setParents(List<Node> successors){
+        for(Node eachSuccessor: successors){
+            eachSuccessor.setParent(currentBoard);
+        }
+        return successors;
+    }
+
     public void solvePuzzle(){
         // TESTING STUFF
         if(isSolvable(currentBoard.getStateArray())){ System.out.println("Puzzle is solvable !");
         }else{ System.out.println("Not solvable !"); return;}
         System.out.println();
         System.out.println("Misplaced Tiles: " + getMisplacedTiles());
+        System.out.println();
         getManhattanDistance();
+        System.out.println();
 
 
         System.out.println("Initial Puzzle " + Arrays.toString(currentBoard.getStateArray()));
@@ -240,14 +257,17 @@ public class PuzzleDriver {
         while(!openList.isEmpty()){
             this.currentBoard = openList.poll();
             //generate successors and set their parents to q
-            List<Node> successors = generateSuccessors();
+            List<Node> successors = setParents(generateSuccessors());
             for(Node x: successors){
-                System.out.println();
-                System.out.println("Successors:");
-                System.out.println("---> " + Arrays.toString(x.getStateArray()));
+                System.out.println("Successor ----> " + Arrays.toString(x.getStateArray()));
+                if(isGoal(x)){
+                    return;
+                }
             }
 
         }
+
+        System.out.println(Arrays.toString(goalBoard));
 
     }
 

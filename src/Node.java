@@ -25,11 +25,19 @@ public class Node{
         return arraySize;
     }
 
+    public Node getParent(){
+        return parent;
+    }
+
     public int getF(){
         return f;
     }
 
     public void setF(int f) {
         this.f = f;
+    }
+
+    public void setParent(Node parent){
+        this.parent = parent;
     }
 }
