@@ -1,10 +1,21 @@
+import java.util.Arrays;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Stack;
+
 public class PuzzleDriver {
+    public enum Action{
+        UP, DOWN, LEFT, RIGHT;
+    }
 
     private Node currentBoard;
+    private Node initialBoard;
     private int[] goalBoard;
+    private PriorityQueue<Node> pQueue = new PriorityQueue<Node>();
 
     PuzzleDriver(int[] initialBoard, int[] goalBoard){
-        this.currentBoard = new Node(initialBoard);
+        this.initialBoard = new Node(initialBoard);
+        this.currentBoard = this.initialBoard;
         this.goalBoard = goalBoard;
     }
 
@@ -95,12 +106,103 @@ public class PuzzleDriver {
         return null;
     }
 
+    public int[] locateEmptyTile(){
+        int[] boardArray = currentBoard.getStateArray();
+        int[] emptyPosition = new int[2];
+        for(int i = 0; i < boardArray.length; i++){
+            if(boardArray[i] == 0){
+                int col = i % ((goalBoard.length/2)-1);
+                int row = (i - col) / ((goalBoard.length/2)-1);
+                emptyPosition = new int[]{row, col};
+                return emptyPosition;
+            }
+        }
+        return emptyPosition;
+    }
+
+    public void swap(){
+        // middle
+        int[] copyArray = Arrays.copyOf(currentBoard.getStateArray(), currentBoard.getArraySize());
+        System.out.println(Arrays.toString(copyArray));
+        int cache = copyArray[4];
+        copyArray[4] = copyArray[1];
+        copyArray[1] = cache;
+        System.out.println(Arrays.toString(copyArray));
+
+    }
+
+    public void swap1(Stack<Action> x){
+        
+        for(int i = 0; i < x.size()+1; i++){
+            Action currentAction = x.pop();
+            switch (currentAction){
+                case UP:
+            }
+        }
+    }
+
+    public void generateSuccessors(int rPos, int cPos){
+        Stack<Action> actionStack = new Stack<Action>();
+        if(rPos == 0){
+            // only down
+            actionStack.push(Action.DOWN);
+        }else if (rPos == 2){
+            // only up
+            actionStack.push(Action.UP);
+        }else {
+            // up & down
+            actionStack.push(Action.UP);
+            actionStack.push(Action.DOWN);
+        }
+
+        if(cPos == 0){
+            // right
+            actionStack.push(Action.RIGHT);
+        }else if (cPos == 2){
+            // left
+            actionStack.push(Action.LEFT);
+        }else{
+            //left & right
+            actionStack.push(Action.LEFT);
+            actionStack.push(Action.RIGHT);
+        }
+
+        System.out.println(actionStack.toString());
+
+        swap1(actionStack);
+
+
+
+
+//        int[] emptyTilePos = locateEmptyTile();
+//        int x = emptyTilePos[0];
+//        int y = emptyTilePos[1];
+//        if(x == 1 && y == 1){
+//            //middle position
+//            //do swap (left, right, up, down)
+//            swap();
+//            System.out.println("Empty is in the middle !");
+//        }
+    }
+
     public void solvePuzzle(){
+        // TESTING STUFF
         if(isSolvable(currentBoard.getStateArray())){ System.out.println("Puzzle is solvable !");
         }else{ System.out.println("Not solvable !");}
         System.out.println();
         System.out.println("Misplaced Tiles: " + getMisplacedTiles());
         getManhattanDistance();
+
+        // initiate A*
+        int[] emptyTile = locateEmptyTile();
+        int x = emptyTile[0];
+        int y = emptyTile[1];
+
+        System.out.println("Empty Tile Location: " + "row: " + x + " | col: " + y);
+        generateSuccessors(x, y);
+
+
+        System.out.println(Arrays.toString(currentBoard.getStateArray()));
 
     }
 
