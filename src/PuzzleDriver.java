@@ -1,7 +1,5 @@
-import java.util.Arrays;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Stack;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class PuzzleDriver {
     public enum Action{
@@ -120,25 +118,75 @@ public class PuzzleDriver {
         return emptyPosition;
     }
 
-    public void swap(){
-        // middle
-        int[] copyArray = Arrays.copyOf(currentBoard.getStateArray(), currentBoard.getArraySize());
-        System.out.println(Arrays.toString(copyArray));
-        int cache = copyArray[4];
-        copyArray[4] = copyArray[1];
-        copyArray[1] = cache;
-        System.out.println(Arrays.toString(copyArray));
-
-    }
-
-    public void swap1(Stack<Action> x){
-        
-        for(int i = 0; i < x.size()+1; i++){
-            Action currentAction = x.pop();
-            switch (currentAction){
-                case UP:
+    public int locateTileIndex(int rPos, int cPos){
+//        System.out.println("Row: " + rPos + " Col: " + cPos);
+        int[] currentArray = currentBoard.getStateArray();
+        for(int i = 0; i < currentArray.length; i++){
+            int boardCol = i % ((currentArray.length/2)-1);
+            int boardRow = (i - boardCol) / ((currentArray.length/2)-1);
+            if(boardRow == rPos && boardCol == cPos){
+//                System.out.println("index : " + i);
+                return i;
             }
         }
+        return 0;
+    }
+
+//    public void swap(){
+//        // middle
+//        int[] copyArray = Arrays.copyOf(currentBoard.getStateArray(), currentBoard.getArraySize());
+//        System.out.println(Arrays.toString(copyArray));
+//        int cache = copyArray[4];
+//        copyArray[4] = copyArray[1];
+//        copyArray[1] = cache;
+//        System.out.println(Arrays.toString(copyArray));
+//
+//    }
+
+    public void swap1(Stack<Action> x){
+        List<int[]> stateArrays = new ArrayList<>();
+        int[] emptyPos = locateEmptyTile();
+
+        for(Action a: x){
+            Action currentAction = a;
+            int[] copyArray = Arrays.copyOf(currentBoard.getStateArray(), currentBoard.getArraySize());
+
+            int rPos = emptyPos[0];
+            int cPos = emptyPos[1];
+            int swapIndex = 0;
+            int emptyTileIndex = locateTileIndex(rPos, cPos);
+            switch (currentAction){
+                case UP:
+                    // decrement row
+                    swapIndex = locateTileIndex(--rPos, cPos);
+                    System.out.println("index: " + swapIndex + " UP");
+                    break;
+                case DOWN:
+                    // increment row
+                    swapIndex = locateTileIndex(++rPos, cPos);
+                    System.out.println("index: " +swapIndex + " DOWN");
+                    break;
+                case LEFT:
+                    // decrement col
+                    swapIndex = locateTileIndex(rPos, --cPos);
+                    System.out.println("index: " +swapIndex + " LEFT");
+                    break;
+                case RIGHT:
+                    // increment col
+                    swapIndex = locateTileIndex(rPos, ++cPos);
+                    System.out.println("index: " +swapIndex + " RIGHT");
+                    break;
+            }
+            // do the swap in the copy array
+            // add this array inside the list
+            int temp = copyArray[swapIndex];
+            copyArray[swapIndex] = copyArray[emptyTileIndex];
+            copyArray[emptyTileIndex] = temp;
+            System.out.println(Arrays.toString(copyArray));
+            System.out.println("******************************");
+            stateArrays.add(copyArray);
+        }
+
     }
 
     public void generateSuccessors(int rPos, int cPos){
@@ -166,8 +214,8 @@ public class PuzzleDriver {
             actionStack.push(Action.LEFT);
             actionStack.push(Action.RIGHT);
         }
-
-        System.out.println(actionStack.toString());
+        System.out.println();
+        System.out.println("actions taken: " + actionStack.toString());
 
         swap1(actionStack);
 
@@ -193,17 +241,11 @@ public class PuzzleDriver {
         System.out.println("Misplaced Tiles: " + getMisplacedTiles());
         getManhattanDistance();
 
-        // initiate A*
-        int[] emptyTile = locateEmptyTile();
-        int x = emptyTile[0];
-        int y = emptyTile[1];
 
-        System.out.println("Empty Tile Location: " + "row: " + x + " | col: " + y);
-        generateSuccessors(x, y);
+        System.out.println("Initial Puzzle " + Arrays.toString(currentBoard.getStateArray()));
 
-
-        System.out.println(Arrays.toString(currentBoard.getStateArray()));
-
+        //A*
+        
     }
 
 

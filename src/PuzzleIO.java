@@ -27,6 +27,7 @@ public class PuzzleIO {
         System.out.println("Enter Puzzle (9 numbers (1-8) including 0)");
         Scanner k = new Scanner(System.in);
         String scanLine = k.nextLine();
+        scanLine = formatInput(scanLine);
         initiateDriver(scanLine);
     }
 
@@ -45,6 +46,10 @@ public class PuzzleIO {
             sb.append(x);
         }
         initiateDriver(sb.toString());
+    }
+
+    public static String formatInput(String inputLine){
+        return inputLine.replaceAll("\\s", "");
     }
 
     public static void initiateDriver(String x){
