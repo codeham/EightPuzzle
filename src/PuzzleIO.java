@@ -57,8 +57,13 @@ public class PuzzleIO {
         for(int i = 0; i < x.length(); i++){
             puzzleBoard[i] = Character.getNumericValue(x.charAt(i));
         }
+        Scanner k = new Scanner(System.in);
+        System.out.println("Pick Heuristic to Run");
+        System.out.println("1. Misplaced Tiles (h1)");
+        System.out.println("2. Manhattan Distance (h2)");
+        int heuristicChoice = k.nextInt();
         int[] goalPuzzle = {0,1,2,3,4,5,6,7,8};
         PuzzleDriver game = new PuzzleDriver(puzzleBoard, goalPuzzle);
-        game.solvePuzzle();
+        game.solvePuzzle(heuristicChoice);
     }
 }
